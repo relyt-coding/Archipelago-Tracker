@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Archipelago Tracker – Wind Waker Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #e8d9a0;
+    --parchment-dark: #c9b87a;
+    --parchment-deeper: #b09050;
+    --parchment-shadow: #8a6e38;
+    --ink: #2a1f0e;
+    --ink-light: #4a3520;
+    --sea-teal: #1a6b7a;
+    --sea-teal-light: #2a8fa0;
+    --sea-teal-bright: #3ab8cc;
+    --ocean-deep: #0d3d4a;
+    --ocean-mid: #1a5566;
+    --gold: #c8920a;
+    --gold-light: #e8b020;
+    --cream: #f5ead0;
+    --mm-color: #7a3a8a;
+    --mm-light: #a060b0;
+    --oot-color: #c87820;
+    --oot-light: #e8982a;
+    --ww-color: #1a6b7a;
+    --ww-light: #2a9bb8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1008;
+    font-family: 'Crimson Text', Georgia, serif;
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ========== CAPTURE AREA ========== */
+  #capture-area {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    background: radial-gradient(ellipse at 50% 30%, #1a5566 0%, #0d3d4a 40%, #061e24 100%);
+    overflow: hidden;
+  }
+
+  /* Ocean wave bg */
+  #capture-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px, transparent 38px,
+        rgba(255,255,255,0.018) 39px, rgba(255,255,255,0.018) 40px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 78px,
+        rgba(255,255,255,0.012) 79px, rgba(255,255,255,0.012) 80px
+      );
+    pointer-events: none;
+  }
+
+  /* ========== PARCHMENT TEXTURE HELPER ========== */
+  .parchment {
+    background-color: var(--parchment);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent, transparent 2px,
+        rgba(139,100,40,0.04) 2px, rgba(139,100,40,0.04) 4px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent, transparent 3px,
+        rgba(139,100,40,0.025) 3px, rgba(139,100,40,0.025) 6px
+      );
+  }
+
+  /* ========== ROPE BORDER ========== */
+  .rope-border {
+    border: 3px solid var(--parchment-shadow);
+    box-shadow:
+      inset 0 0 0 2px var(--parchment-dark),
+      inset 0 0 0 4px var(--parchment-shadow),
+      0 4px 16px rgba(0,0,0,0.5);
+    border-radius: 4px;
+  }
+
+  /* ========== MODE: FOOTER ========== */
+  #mode-footer {
+    display: none;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 108px;
+  }
+
+  #mode-footer.active { display: flex; }
+
+  .footer-tracker {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    border-right: 2px solid var(--parchment-shadow);
+    position: relative;
+  }
+  .footer-tracker:last-child { border-right: none; }
+
+  .footer-bg {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(232,217,160,0.92);
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,100,40,0.04) 2px, rgba(139,100,40,0.04) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,100,40,0.025) 3px, rgba(139,100,40,0.025) 6px);
+    border-top: 3px solid var(--parchment-shadow);
+    box-shadow: inset 0 2px 0 var(--parchment-dark), 0 -4px 20px rgba(0,0,0,0.6);
+  }
+
+  .footer-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .footer-game-name {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    text-shadow: 1px 1px 0 var(--parchment-dark);
+    flex: 0 0 auto;
+  }
+
+  .footer-check-count {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ocean-deep);
+    flex: 0 0 auto;
+  }
+
+  .footer-bar-wrap {
+    flex: 1;
+    margin: 0 24px;
+    height: 20px;
+    background: rgba(10,30,40,0.25);
+    border: 1px solid var(--parchment-shadow);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .footer-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .footer-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .bar-mm { background: linear-gradient(90deg, var(--mm-color), var(--mm-light)); }
+  .bar-oot { background: linear-gradient(90deg, var(--oot-color), var(--oot-light)); }
+  .bar-ww { background: linear-gradient(90deg, var(--ww-color), var(--ww-light)); }
+
+  /* ========== MODE: COMPACT ========== */
+  #mode-compact {
+    display: none;
+    position: absolute;
+    top: 20px; left: 20px;
+    width: 400px;
+    height: 300px;
+  }
+
+  #mode-compact.active { display: flex; flex-direction: column; }
+
+  .compact-header {
+    padding: 5px 16px 4px;
+    text-align: center;
+    border-bottom: 2px solid var(--parchment-shadow);
+    position: relative;
+    z-index: 1;
+  }
+
+  .compact-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .compact-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+  }
+
+  .compact-tracker {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    padding: 6px 20px;
+    border-bottom: 1px solid rgba(139,100,40,0.4);
+    position: relative;
+  }
+  .compact-tracker:last-child { border-bottom: none; }
+
+  .compact-game-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  .compact-game-label {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+
+  .compact-count {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ocean-deep);
+  }
+
+  .compact-bar-wrap {
+    height: 14px;
+    background: rgba(10,30,40,0.2);
+    border: 1px solid rgba(139,100,40,0.5);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .compact-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+  .compact-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .compact-percent {
+    font-family: 'Crimson Text', serif;
+    font-size: 12px;
+    color: var(--ink-light);
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* ========== MODE: FULLSCREEN ========== */
+  #mode-fullscreen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 80px;
+    gap: 0;
+  }
+
+  #mode-fullscreen.active { display: flex; }
+
+  .fs-title-area {
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+  }
+
+  .fs-main-title {
+    font-family: 'Cinzel', serif;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--parchment);
+    letter-spacing: 0.12em;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8), 0 0 40px rgba(200,180,100,0.3);
+    position: relative;
+  }
+
+  .fs-subtitle {
+    font-family: 'Crimson Text', serif;
+    font-size: 22px;
+    font-style: italic;
+    color: var(--parchment-dark);
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+
+  .fs-divider {
+    width: 600px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--parchment-dark), var(--gold), transparent);
+    margin: 16px auto 0;
+    opacity: 0.7;
+  }
+
+  .fs-trackers {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  .fs-tracker {
+    position: relative;
+    padding: 28px 48px;
+    border-radius: 6px;
+  }
+
+  .fs-tracker-bg {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(232,217,160,0.88);
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,100,40,0.04) 2px, rgba(139,100,40,0.04) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(139,100,40,0.025) 3px, rgba(139,100,40,0.025) 6px);
+    border: 3px solid var(--parchment-shadow);
+    box-shadow: inset 0 0 0 1px var(--parchment-dark), 0 6px 24px rgba(0,0,0,0.5);
+    border-radius: 6px;
+  }
+
+  .fs-tracker-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .fs-game-label {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex: 0 0 320px;
+    text-shadow: 1px 1px 0 var(--parchment-dark);
+  }
+
+  .fs-game-accent {
+    display: block;
+    font-size: 14px;
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-light);
+    letter-spacing: 0.12em;
+    margin-top: 2px;
+    opacity: 0.7;
+  }
+
+  .fs-bar-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .fs-bar-outer {
+    height: 32px;
+    background: rgba(10,30,40,0.22);
+    border: 1px solid var(--parchment-shadow);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .fs-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+    position: relative;
+  }
+  .fs-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    background: rgba(255,255,255,0.18);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .fs-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Crimson Text', serif;
+    font-size: 15px;
+    color: var(--ink-light);
+  }
+
+  .fs-count {
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--ocean-deep);
+    flex: 0 0 auto;
+    text-align: right;
+    min-width: 200px;
+    text-shadow: 1px 1px 0 var(--parchment-dark);
+    line-height: 1;
+  }
+
+  .fs-count-slash {
+    font-size: 28px;
+    opacity: 0.5;
+    margin: 0 4px;
+  }
+
+  /* Corner decorations for fullscreen cards */
+  .fs-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 2;
+  }
+  .fs-corner.tl { top: 6px; left: 6px; border-top: 2px solid var(--parchment-shadow); border-left: 2px solid var(--parchment-shadow); }
+  .fs-corner.tr { top: 6px; right: 6px; border-top: 2px solid var(--parchment-shadow); border-right: 2px solid var(--parchment-shadow); }
+  .fs-corner.bl { bottom: 6px; left: 6px; border-bottom: 2px solid var(--parchment-shadow); border-left: 2px solid var(--parchment-shadow); }
+  .fs-corner.br { bottom: 6px; right: 6px; border-bottom: 2px solid var(--parchment-shadow); border-right: 2px solid var(--parchment-shadow); }
+
+  /* ========== ADMIN PANEL ========== */
+  #admin-panel {
+    width: 1920px;
+    background: #1a1008;
+    border-top: 3px solid var(--parchment-shadow);
+    padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(200,180,100,0.2);
+  }
+
+  .admin-title {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--parchment);
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 12px rgba(200,180,100,0.4);
+  }
+
+  .mode-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .mode-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 8px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 2px solid var(--parchment-shadow);
+    background: rgba(232,217,160,0.08);
+    color: var(--parchment-dark);
+    transition: all 0.2s;
+  }
+  .mode-btn:hover { background: rgba(232,217,160,0.18); color: var(--parchment); }
+  .mode-btn.active {
+    background: var(--parchment-shadow);
+    color: var(--ink);
+    box-shadow: 0 0 12px rgba(200,180,100,0.3);
+  }
+
+  .admin-games {
+    display: flex;
+    gap: 20px;
+  }
+
+  .admin-game-card {
+    flex: 1;
+    background: rgba(232,217,160,0.06);
+    border: 1px solid rgba(200,180,100,0.25);
+    border-radius: 4px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .admin-game-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(200,180,100,0.2);
+  }
+
+  .admin-game-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-mm { background: var(--mm-light); }
+  .dot-oot { background: var(--oot-light); }
+  .dot-ww { background: var(--ww-light); }
+
+  .admin-game-name {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--parchment);
+    letter-spacing: 0.06em;
+  }
+
+  .admin-count-display {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gold-light);
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  .admin-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .admin-row-label {
+    font-family: 'Crimson Text', serif;
+    font-size: 13px;
+    color: rgba(200,180,100,0.6);
+    width: 52px;
+    flex-shrink: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-btns {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .adj-btn {
+    flex: 1;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 2px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid rgba(200,180,100,0.25);
+    background: rgba(232,217,160,0.06);
+    color: var(--parchment-dark);
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+  .adj-btn:hover { background: rgba(232,217,160,0.18); color: var(--parchment); border-color: rgba(200,180,100,0.5); }
+  .adj-btn:active { transform: scale(0.96); }
+
+  .adj-btn.plus { color: #7be87b; border-color: rgba(123,232,123,0.3); }
+  .adj-btn.plus:hover { background: rgba(123,232,123,0.12); color: #a0f0a0; }
+  .adj-btn.minus { color: #e87b7b; border-color: rgba(232,123,123,0.3); }
+  .adj-btn.minus:hover { background: rgba(232,123,123,0.12); color: #f0a0a0; }
+
+  .total-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .total-input {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    width: 70px;
+    padding: 4px 8px;
+    background: rgba(10,20,30,0.6);
+    border: 1px solid rgba(200,180,100,0.3);
+    border-radius: 2px;
+    color: var(--parchment);
+    text-align: center;
+    outline: none;
+  }
+  .total-input:focus { border-color: var(--gold); }
+
+  .set-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid rgba(200,180,100,0.4);
+    background: rgba(200,144,10,0.2);
+    color: var(--gold-light);
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .set-btn:hover { background: rgba(200,144,10,0.4); }
+
+  .reset-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid rgba(232,123,123,0.3);
+    background: rgba(232,123,123,0.08);
+    color: #e87b7b;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+    margin-left: auto;
+  }
+  .reset-btn:hover { background: rgba(232,123,123,0.2); }
+
+  /* Total row at bottom of admin */
+  .admin-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(200,180,100,0.15);
+  }
+
+  .admin-total-text {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: rgba(200,180,100,0.6);
+    letter-spacing: 0.08em;
+  }
+
+  .admin-total-val {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 1920x1080 CAPTURE AREA ===== -->
+<div id="capture-area">
+
+  <!-- FOOTER MODE -->
+  <div id="mode-footer">
+    <div class="footer-tracker">
+      <div class="footer-bg"></div>
+      <div class="footer-content">
+        <div class="footer-game-name">Majora's Mask</div>
+        <div class="footer-bar-wrap">
+          <div class="footer-bar-fill bar-mm" id="footer-bar-mm" style="width:0%"></div>
+        </div>
+        <div class="footer-check-count" id="footer-count-mm">0 / 398</div>
+      </div>
+    </div>
+    <div class="footer-tracker">
+      <div class="footer-bg"></div>
+      <div class="footer-content">
+        <div class="footer-game-name">Ocarina of Time</div>
+        <div class="footer-bar-wrap">
+          <div class="footer-bar-fill bar-oot" id="footer-bar-oot" style="width:0%"></div>
+        </div>
+        <div class="footer-check-count" id="footer-count-oot">0 / 1522</div>
+      </div>
+    </div>
+    <div class="footer-tracker">
+      <div class="footer-bg"></div>
+      <div class="footer-content">
+        <div class="footer-game-name">Wind Waker</div>
+        <div class="footer-bar-wrap">
+          <div class="footer-bar-fill bar-ww" id="footer-bar-ww" style="width:0%"></div>
+        </div>
+        <div class="footer-check-count" id="footer-count-ww">0 / 313</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPACT MODE -->
+  <div id="mode-compact">
+    <div style="position:absolute;inset:0;background-color:rgba(232,217,160,0.93);background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(139,100,40,0.04) 2px,rgba(139,100,40,0.04) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(139,100,40,0.025) 3px,rgba(139,100,40,0.025) 6px);border:3px solid var(--parchment-shadow);box-shadow:inset 0 0 0 1px var(--parchment-dark),0 6px 24px rgba(0,0,0,0.7);border-radius:4px;"></div>
+    <div class="compact-header">
+      <div class="compact-title">⚓ Archipelago · Checks</div>
+    </div>
+    <div class="compact-body">
+      <div class="compact-tracker">
+        <div class="compact-game-row">
+          <span class="compact-game-label">Majora's Mask</span>
+          <span class="compact-count" id="compact-count-mm">0 / 398</span>
+        </div>
+        <div class="compact-bar-wrap">
+          <div class="compact-bar-fill bar-mm" id="compact-bar-mm" style="width:0%"></div>
+        </div>
+        <div class="compact-percent" id="compact-pct-mm">0%</div>
+      </div>
+      <div class="compact-tracker">
+        <div class="compact-game-row">
+          <span class="compact-game-label">Ocarina of Time</span>
+          <span class="compact-count" id="compact-count-oot">0 / 1522</span>
+        </div>
+        <div class="compact-bar-wrap">
+          <div class="compact-bar-fill bar-oot" id="compact-bar-oot" style="width:0%"></div>
+        </div>
+        <div class="compact-percent" id="compact-pct-oot">0%</div>
+      </div>
+      <div class="compact-tracker">
+        <div class="compact-game-row">
+          <span class="compact-game-label">Wind Waker</span>
+          <span class="compact-count" id="compact-count-ww">0 / 313</span>
+        </div>
+        <div class="compact-bar-wrap">
+          <div class="compact-bar-fill bar-ww" id="compact-bar-ww" style="width:0%"></div>
+        </div>
+        <div class="compact-percent" id="compact-pct-ww">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN MODE -->
+  <div id="mode-fullscreen">
+    <div class="fs-title-area">
+      <div class="fs-main-title">⚓ Archipelago Multiworld</div>
+      <div class="fs-subtitle">Sea Chart — Check Progress</div>
+      <div class="fs-divider"></div>
+    </div>
+    <div class="fs-trackers">
+
+      <!-- MM -->
+      <div class="fs-tracker">
+        <div class="fs-tracker-bg"></div>
+        <div class="fs-corner tl"></div><div class="fs-corner tr"></div>
+        <div class="fs-corner bl"></div><div class="fs-corner br"></div>
+        <div class="fs-tracker-content">
+          <div class="fs-game-label">
+            Majora's Mask
+            <span class="fs-game-accent">Nintendo 64 · 2000</span>
+          </div>
+          <div class="fs-bar-area">
+            <div class="fs-bar-outer">
+              <div class="fs-bar-fill bar-mm" id="fs-bar-mm" style="width:0%"></div>
+            </div>
+            <div class="fs-bar-label">
+              <span id="fs-pct-mm">0% complete</span>
+              <span id="fs-remain-mm">398 remaining</span>
+            </div>
+          </div>
+          <div class="fs-count" id="fs-count-mm">
+            <span id="fs-cur-mm">0</span><span class="fs-count-slash"> / </span><span id="fs-tot-mm">398</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- OoT -->
+      <div class="fs-tracker">
+        <div class="fs-tracker-bg"></div>
+        <div class="fs-corner tl"></div><div class="fs-corner tr"></div>
+        <div class="fs-corner bl"></div><div class="fs-corner br"></div>
+        <div class="fs-tracker-content">
+          <div class="fs-game-label">
+            Ocarina of Time
+            <span class="fs-game-accent">Nintendo 64 · 1998</span>
+          </div>
+          <div class="fs-bar-area">
+            <div class="fs-bar-outer">
+              <div class="fs-bar-fill bar-oot" id="fs-bar-oot" style="width:0%"></div>
+            </div>
+            <div class="fs-bar-label">
+              <span id="fs-pct-oot">0% complete</span>
+              <span id="fs-remain-oot">1522 remaining</span>
+            </div>
+          </div>
+          <div class="fs-count" id="fs-count-oot">
+            <span id="fs-cur-oot">0</span><span class="fs-count-slash"> / </span><span id="fs-tot-oot">1522</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WW -->
+      <div class="fs-tracker">
+        <div class="fs-tracker-bg"></div>
+        <div class="fs-corner tl"></div><div class="fs-corner tr"></div>
+        <div class="fs-corner bl"></div><div class="fs-corner br"></div>
+        <div class="fs-tracker-content">
+          <div class="fs-game-label">
+            Wind Waker
+            <span class="fs-game-accent">GameCube · 2002</span>
+          </div>
+          <div class="fs-bar-area">
+            <div class="fs-bar-outer">
+              <div class="fs-bar-fill bar-ww" id="fs-bar-ww" style="width:0%"></div>
+            </div>
+            <div class="fs-bar-label">
+              <span id="fs-pct-ww">0% complete</span>
+              <span id="fs-remain-ww">313 remaining</span>
+            </div>
+          </div>
+          <div class="fs-count" id="fs-count-ww">
+            <span id="fs-cur-ww">0</span><span class="fs-count-slash"> / </span><span id="fs-tot-ww">313</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- end capture-area -->
+
+<!-- ===== ADMIN PANEL (below capture area) ===== -->
+<div id="admin-panel">
+  <div class="admin-header">
+    <div class="admin-title">⚓ Tracker Admin — Sea Chart Control</div>
+    <div class="mode-buttons">
+      <span style="font-family:'Crimson Text',serif;font-size:13px;color:rgba(200,180,100,0.5);margin-right:6px;letter-spacing:0.06em;">Mode:</span>
+      <button class="mode-btn" id="btn-footer" onclick="setMode('footer')">Footer</button>
+      <button class="mode-btn" id="btn-compact" onclick="setMode('compact')">Compact</button>
+      <button class="mode-btn active" id="btn-fullscreen" onclick="setMode('fullscreen')">Full Screen</button>
+    </div>
+  </div>
+
+  <div class="admin-games">
+
+    <!-- MAJORA'S MASK -->
+    <div class="admin-game-card">
+      <div class="admin-game-header">
+        <div class="admin-game-dot dot-mm"></div>
+        <div class="admin-game-name">Majora's Mask</div>
+        <button class="reset-btn" onclick="resetGame('mm')">Reset</button>
+      </div>
+      <div class="admin-count-display" id="admin-display-mm">0 / 398</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Total:</span>
+        <div class="total-input-wrap">
+          <input type="number" class="total-input" id="total-input-mm" value="398" min="1">
+          <button class="set-btn" onclick="setTotal('mm')">Set</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">+checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn plus" onclick="adjust('mm',1)">+1</button>
+          <button class="adj-btn plus" onclick="adjust('mm',5)">+5</button>
+          <button class="adj-btn plus" onclick="adjust('mm',10)">+10</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">−checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn minus" onclick="adjust('mm',-1)">−1</button>
+          <button class="adj-btn minus" onclick="adjust('mm',-5)">−5</button>
+          <button class="adj-btn minus" onclick="adjust('mm',-10)">−10</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCARINA OF TIME -->
+    <div class="admin-game-card">
+      <div class="admin-game-header">
+        <div class="admin-game-dot dot-oot"></div>
+        <div class="admin-game-name">Ocarina of Time</div>
+        <button class="reset-btn" onclick="resetGame('oot')">Reset</button>
+      </div>
+      <div class="admin-count-display" id="admin-display-oot">0 / 1522</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Total:</span>
+        <div class="total-input-wrap">
+          <input type="number" class="total-input" id="total-input-oot" value="1522" min="1">
+          <button class="set-btn" onclick="setTotal('oot')">Set</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">+checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn plus" onclick="adjust('oot',1)">+1</button>
+          <button class="adj-btn plus" onclick="adjust('oot',5)">+5</button>
+          <button class="adj-btn plus" onclick="adjust('oot',10)">+10</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">−checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn minus" onclick="adjust('oot',-1)">−1</button>
+          <button class="adj-btn minus" onclick="adjust('oot',-5)">−5</button>
+          <button class="adj-btn minus" onclick="adjust('oot',-10)">−10</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIND WAKER -->
+    <div class="admin-game-card">
+      <div class="admin-game-header">
+        <div class="admin-game-dot dot-ww"></div>
+        <div class="admin-game-name">Wind Waker</div>
+        <button class="reset-btn" onclick="resetGame('ww')">Reset</button>
+      </div>
+      <div class="admin-count-display" id="admin-display-ww">0 / 313</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Total:</span>
+        <div class="total-input-wrap">
+          <input type="number" class="total-input" id="total-input-ww" value="313" min="1">
+          <button class="set-btn" onclick="setTotal('ww')">Set</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">+checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn plus" onclick="adjust('ww',1)">+1</button>
+          <button class="adj-btn plus" onclick="adjust('ww',5)">+5</button>
+          <button class="adj-btn plus" onclick="adjust('ww',10)">+10</button>
+        </div>
+      </div>
+      <div class="admin-row">
+        <span class="admin-row-label">−checks:</span>
+        <div class="admin-btns">
+          <button class="adj-btn minus" onclick="adjust('ww',-1)">−1</button>
+          <button class="adj-btn minus" onclick="adjust('ww',-5)">−5</button>
+          <button class="adj-btn minus" onclick="adjust('ww',-10)">−10</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="admin-total-row">
+    <span class="admin-total-text">TOTAL CHECKS:</span>
+    <span class="admin-total-val" id="admin-grand-total">0 / 2233</span>
+    <span class="admin-total-text" style="margin-left:20px;">COMBINED PROGRESS:</span>
+    <span class="admin-total-val" id="admin-grand-pct">0%</span>
+  </div>
+</div>
+
+<script>
+  const state = {
+    mm:  { current: 0, total: 398 },
+    oot: { current: 0, total: 1522 },
+    ww:  { current: 0, total: 313 }
+  };
+
+  let currentMode = 'fullscreen';
+
+  function pct(game) {
+    const s = state[game];
+    if (s.total === 0) return 0;
+    return Math.min(100, Math.round(s.current / s.total * 100));
+  }
+
+  function updateAll() {
+    ['mm','oot','ww'].forEach(g => {
+      const s = state[g];
+      const p = pct(g);
+      const remain = Math.max(0, s.total - s.current);
+
+      // Footer
+      document.getElementById('footer-bar-' + g).style.width = p + '%';
+      document.getElementById('footer-count-' + g).textContent = s.current + ' / ' + s.total;
+
+      // Compact
+      document.getElementById('compact-bar-' + g).style.width = p + '%';
+      document.getElementById('compact-count-' + g).textContent = s.current + ' / ' + s.total;
+      document.getElementById('compact-pct-' + g).textContent = p + '% complete';
+
+      // Fullscreen
+      document.getElementById('fs-bar-' + g).style.width = p + '%';
+      document.getElementById('fs-cur-' + g).textContent = s.current;
+      document.getElementById('fs-tot-' + g).textContent = s.total;
+      document.getElementById('fs-pct-' + g).textContent = p + '% complete';
+      document.getElementById('fs-remain-' + g).textContent = remain + ' remaining';
+
+      // Admin
+      document.getElementById('admin-display-' + g).textContent = s.current + ' / ' + s.total;
+    });
+
+    // Grand total
+    const totalCur = state.mm.current + state.oot.current + state.ww.current;
+    const totalTot = state.mm.total + state.oot.total + state.ww.total;
+    const grandPct = totalTot > 0 ? Math.round(totalCur / totalTot * 100) : 0;
+    document.getElementById('admin-grand-total').textContent = totalCur + ' / ' + totalTot;
+    document.getElementById('admin-grand-pct').textContent = grandPct + '%';
+  }
+
+  function adjust(game, delta) {
+    const s = state[game];
+    s.current = Math.max(0, Math.min(s.total, s.current + delta));
+    updateAll();
+  }
+
+  function setTotal(game) {
+    const input = document.getElementById('total-input-' + game);
+    const val = parseInt(input.value, 10);
+    if (!isNaN(val) && val > 0) {
+      state[game].total = val;
+      state[game].current = Math.min(state[game].current, val);
+      updateAll();
+    }
+  }
+
+  function resetGame(game) {
+    state[game].current = 0;
+    updateAll();
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('mode-footer').classList.toggle('active', mode === 'footer');
+    document.getElementById('mode-compact').classList.toggle('active', mode === 'compact');
+    document.getElementById('mode-fullscreen').classList.toggle('active', mode === 'fullscreen');
+    document.getElementById('btn-footer').classList.toggle('active', mode === 'footer');
+    document.getElementById('btn-compact').classList.toggle('active', mode === 'compact');
+    document.getElementById('btn-fullscreen').classList.toggle('active', mode === 'fullscreen');
+  }
+
+  // Start in fullscreen mode
+  setMode('fullscreen');
+  updateAll();
+</script>
+</body>
+</html>
