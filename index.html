@@ -689,7 +689,7 @@
     <div class="footer-tracker">
       <div class="footer-bg"></div>
       <div class="footer-content">
-        <div class="footer-game-name">Majora's Mask</div>
+        <div class="footer-game-name" id="footer-name-mm">Majora's Mask</div>
         <div class="footer-bar-wrap">
           <div class="footer-bar-fill bar-mm" id="footer-bar-mm" style="width:0%"></div>
         </div>
@@ -699,7 +699,7 @@
     <div class="footer-tracker">
       <div class="footer-bg"></div>
       <div class="footer-content">
-        <div class="footer-game-name">Ocarina of Time</div>
+        <div class="footer-game-name" id="footer-name-oot">Ocarina of Time</div>
         <div class="footer-bar-wrap">
           <div class="footer-bar-fill bar-oot" id="footer-bar-oot" style="width:0%"></div>
         </div>
@@ -709,7 +709,7 @@
     <div class="footer-tracker">
       <div class="footer-bg"></div>
       <div class="footer-content">
-        <div class="footer-game-name">Wind Waker</div>
+        <div class="footer-game-name" id="footer-name-ww">Wind Waker</div>
         <div class="footer-bar-wrap">
           <div class="footer-bar-fill bar-ww" id="footer-bar-ww" style="width:0%"></div>
         </div>
@@ -727,7 +727,7 @@
     <div class="compact-body">
       <div class="compact-tracker">
         <div class="compact-game-row">
-          <span class="compact-game-label">Majora's Mask</span>
+          <span class="compact-game-label" id="compact-name-mm">Majora's Mask</span>
           <span class="compact-count" id="compact-count-mm">0 / 398</span>
         </div>
         <div class="compact-bar-wrap">
@@ -737,7 +737,7 @@
       </div>
       <div class="compact-tracker">
         <div class="compact-game-row">
-          <span class="compact-game-label">Ocarina of Time</span>
+          <span class="compact-game-label" id="compact-name-oot">Ocarina of Time</span>
           <span class="compact-count" id="compact-count-oot">0 / 1522</span>
         </div>
         <div class="compact-bar-wrap">
@@ -747,7 +747,7 @@
       </div>
       <div class="compact-tracker">
         <div class="compact-game-row">
-          <span class="compact-game-label">Wind Waker</span>
+          <span class="compact-game-label" id="compact-name-ww">Wind Waker</span>
           <span class="compact-count" id="compact-count-ww">0 / 313</span>
         </div>
         <div class="compact-bar-wrap">
@@ -774,7 +774,7 @@
         <div class="fs-corner bl"></div><div class="fs-corner br"></div>
         <div class="fs-tracker-content">
           <div class="fs-game-label">
-            Majora's Mask
+            <span id="fs-name-mm">Majora's Mask</span>
             <span class="fs-game-accent">Nintendo 64 · 2000</span>
           </div>
           <div class="fs-bar-area">
@@ -799,7 +799,7 @@
         <div class="fs-corner bl"></div><div class="fs-corner br"></div>
         <div class="fs-tracker-content">
           <div class="fs-game-label">
-            Ocarina of Time
+            <span id="fs-name-oot">Ocarina of Time</span>
             <span class="fs-game-accent">Nintendo 64 · 1998</span>
           </div>
           <div class="fs-bar-area">
@@ -824,7 +824,7 @@
         <div class="fs-corner bl"></div><div class="fs-corner br"></div>
         <div class="fs-tracker-content">
           <div class="fs-game-label">
-            Wind Waker
+            <span id="fs-name-ww">Wind Waker</span>
             <span class="fs-game-accent">GameCube · 2002</span>
           </div>
           <div class="fs-bar-area">
@@ -865,10 +865,17 @@
     <div class="admin-game-card">
       <div class="admin-game-header">
         <div class="admin-game-dot dot-mm"></div>
-        <div class="admin-game-name">Majora's Mask</div>
+        <div class="admin-game-name" id="admin-header-name-mm">Majora's Mask</div>
         <button class="reset-btn" onclick="resetGame('mm')">Reset</button>
       </div>
       <div class="admin-count-display" id="admin-display-mm">0 / 398</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Name:</span>
+        <div class="total-input-wrap" style="flex:1">
+          <input type="text" class="total-input" id="name-input-mm" value="Majora's Mask" style="width:100%;text-align:left;">
+          <button class="set-btn" onclick="setName('mm')">Set</button>
+        </div>
+      </div>
       <div class="admin-row">
         <span class="admin-row-label">Total:</span>
         <div class="total-input-wrap">
@@ -898,10 +905,17 @@
     <div class="admin-game-card">
       <div class="admin-game-header">
         <div class="admin-game-dot dot-oot"></div>
-        <div class="admin-game-name">Ocarina of Time</div>
+        <div class="admin-game-name" id="admin-header-name-oot">Ocarina of Time</div>
         <button class="reset-btn" onclick="resetGame('oot')">Reset</button>
       </div>
       <div class="admin-count-display" id="admin-display-oot">0 / 1522</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Name:</span>
+        <div class="total-input-wrap" style="flex:1">
+          <input type="text" class="total-input" id="name-input-oot" value="Ocarina of Time" style="width:100%;text-align:left;">
+          <button class="set-btn" onclick="setName('oot')">Set</button>
+        </div>
+      </div>
       <div class="admin-row">
         <span class="admin-row-label">Total:</span>
         <div class="total-input-wrap">
@@ -931,10 +945,17 @@
     <div class="admin-game-card">
       <div class="admin-game-header">
         <div class="admin-game-dot dot-ww"></div>
-        <div class="admin-game-name">Wind Waker</div>
+        <div class="admin-game-name" id="admin-header-name-ww">Wind Waker</div>
         <button class="reset-btn" onclick="resetGame('ww')">Reset</button>
       </div>
       <div class="admin-count-display" id="admin-display-ww">0 / 313</div>
+      <div class="admin-row">
+        <span class="admin-row-label">Name:</span>
+        <div class="total-input-wrap" style="flex:1">
+          <input type="text" class="total-input" id="name-input-ww" value="Wind Waker" style="width:100%;text-align:left;">
+          <button class="set-btn" onclick="setName('ww')">Set</button>
+        </div>
+      </div>
       <div class="admin-row">
         <span class="admin-row-label">Total:</span>
         <div class="total-input-wrap">
@@ -972,9 +993,9 @@
 
 <script>
   const state = {
-    mm:  { current: 0, total: 398 },
-    oot: { current: 0, total: 1522 },
-    ww:  { current: 0, total: 313 }
+    mm:  { current: 0, total: 398,  name: "Majora's Mask" },
+    oot: { current: 0, total: 1522, name: "Ocarina of Time" },
+    ww:  { current: 0, total: 313,  name: "Wind Waker" }
   };
 
   let currentMode = 'fullscreen';
@@ -990,6 +1011,12 @@
       const s = state[g];
       const p = pct(g);
       const remain = Math.max(0, s.total - s.current);
+
+      // Names — all modes
+      document.getElementById('footer-name-' + g).textContent = s.name;
+      document.getElementById('compact-name-' + g).textContent = s.name;
+      document.getElementById('fs-name-' + g).textContent = s.name;
+      document.getElementById('admin-header-name-' + g).textContent = s.name;
 
       // Footer
       document.getElementById('footer-bar-' + g).style.width = p + '%';
@@ -1031,6 +1058,15 @@
     if (!isNaN(val) && val > 0) {
       state[game].total = val;
       state[game].current = Math.min(state[game].current, val);
+      updateAll();
+    }
+  }
+
+  function setName(game) {
+    const input = document.getElementById('name-input-' + game);
+    const val = input.value.trim();
+    if (val) {
+      state[game].name = val;
       updateAll();
     }
   }
